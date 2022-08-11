@@ -393,7 +393,7 @@ class DefectDojoAPIv2(object):
 #       Retrieves a product list by using the product name 
         #Note (search is made with Like.
 
-        return self._request('GET', 'products/?name=' + str(product_name) + '/')
+        return self._request('GET', 'products/?name=' + str(product_name))
 
 
     def create_product(self, name, description, prod_type):
@@ -672,13 +672,14 @@ class DefectDojoAPIv2(object):
     ###### Findings API #######
     def list_findings(self, active=None, duplicate=None, mitigated=None, severity=None, verified=None, severity_lt=None,
         severity_gt=None, severity_contains=None, title_contains=None, url_contains=None, date_lt=None,
-        date_gt=None, date=None, product_id_in=None, engagement_id_in=None, test_id_in=None, build=None, limit=20, offset=0, related_fields=False):
-
+        date_gt=None, date=None, product_id_in=None, engagement_id_in=None, test_id_in=None, build=None, limit=20, offset=0,
+        related_fields=False,
+        is_mitigated=None, tags=None):
         """Returns filtered list of findings.
 
         :param active: Finding is active: (true or false)
         :param duplicate: Duplicate finding (true or false)
-        :param mitigated: Mitigated finding (true or false)
+        :param mitigated: Mitigation date.
         :param severity: Severity: Low, Medium, High and Critical.
         :param verified: Finding verified.
         :param severity_lt: Severity less than Low, Medium, High and Critical.
@@ -695,6 +696,8 @@ class DefectDojoAPIv2(object):
         :param build_id: User specified build id relating to the build number from the build server. (Jenkins, Travis etc.).
         :param limit: Number of records to return.
         :param offset: The initial index from which to return the results
+        :param is_mitigated: Mitigated finding (true or false).
+        :param tags: Comma separated list of exact tags.
 
         """
 
@@ -757,6 +760,12 @@ class DefectDojoAPIv2(object):
             params['build_id__contains'] = build
         if related_fields:
             params['related_fields'] = 'true'
+
+        if is_mitigated:
+            params['is_mitigated'] = is_mitigated
+
+        if tags:
+            params['tags'] = tags
 
         return self._request('GET', 'findings/', params)
 
@@ -911,6 +920,16 @@ class DefectDojoAPIv2(object):
             data['build_id'] = build
 
         return self._request('PUT', 'findings/' + str(finding_id) + '/', data=data)
+
+    def delete_finding(self, finding_id):
+
+        """Deletes a finding with the given id.
+
+        :param finding_id: ID of finding to delete.
+
+        """
+
+        return self._request('DELETE', 'findings/' + str(finding_id))
 
     ##### Build Details API #####
 
